@@ -64,7 +64,7 @@ public class AtmController {
 				System.out.println(quotient);
 				System.out.println(remainder);
 				
-				if (quotient > 0 && !aMethod(denoms, bnq, remainder)) {
+				if (remainder == 0 || (quotient > 0 && !aMethod(denoms, bnq, remainder) && !aMethod(denoms, bnq, runningAmt - bnq.getBankNote().getDenomination()))) {
 					dispense.add(bnq.getBankNote());
 					bnq.decrement();
 					runningAmt -= bnq.getBankNote().getDenomination();
