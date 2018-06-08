@@ -17,7 +17,7 @@ import atm.repository.BankNoteRepository;
 
 public class StartupRunner implements CommandLineRunner {
 
-protected final Log logger = LogFactory.getLog(getClass());
+	protected final Log logger = LogFactory.getLog(getClass());
 	
 	@Autowired 
 	private BankNoteRepository bankNoteRepository;

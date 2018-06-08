@@ -7,7 +7,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 
 @Entity
-public class BankNoteQty {
+public class BankNoteQty implements Comparable<BankNoteQty> {
 
 	@Id
 	@GeneratedValue
@@ -42,6 +42,19 @@ public class BankNoteQty {
 
 	public BankNote getBankNote() {
 		return bankNote;
+	}
+
+	@Override
+	public int compareTo(BankNoteQty o) {
+		return bankNote.compareTo(o.bankNote);
+	}
+	
+	public void increment() {
+		this.quantity++;
+	}
+	
+	public void decrement() {
+		this.quantity--;
 	}
 
 	

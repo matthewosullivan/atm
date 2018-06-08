@@ -5,7 +5,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
 @Entity
-public class BankNote {
+public class BankNote implements Comparable<BankNote> {
 	
 	@Id
 	@GeneratedValue
@@ -32,6 +32,16 @@ public class BankNote {
 
 	public void setDenomination(int denomination) {
 		this.denomination = denomination;
+	}
+
+	@Override
+	public int compareTo(BankNote o) {
+		if (denomination > o.denomination) {
+			return -1;
+		} else if (denomination > o.denomination) {
+			return 1;
+		}
+		return 0;
 	}
 	
 	

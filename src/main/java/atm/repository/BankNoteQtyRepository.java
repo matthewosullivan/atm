@@ -7,5 +7,5 @@ import atm.entity.BankNoteQty;
 
 @Repository
 public interface BankNoteQtyRepository extends CrudRepository<BankNoteQty, Long>{
-
+	
 }
