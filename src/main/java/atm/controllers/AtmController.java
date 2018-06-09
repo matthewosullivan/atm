@@ -1,6 +1,7 @@
 package atm.controllers;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -39,17 +40,42 @@ public class AtmController {
 		return bankNoteQtyRepository.findAll();
 	}
 	
+	@RequestMapping(value = "/withdraw", method = RequestMethod.GET)
+	public Receipt withdraw() {
+		int runningAmt = 110;
+		
+		List<BankNoteQty> bankNoteQtyList = StreamSupport.stream(bankNoteQtyRepository.findAll().spliterator(), false)
+				.filter(bnq -> bnq.getQuantity() != 0).collect(Collectors.toList());
+		
+		// get list of bank notes
+		bankNoteQtyList.stream().map(bnq -> {
+			int[] notes = new int[bnq.getQuantity()];
+			Arrays.setAll(notes, () -> bnq.getBankNote().getDenomination());
+			return notes;
+		});
+		
+		
+		return null;
+	}
+	
 	@RequestMapping(value = "/withdraw", method = RequestMethod.POST)
 	public Receipt withdraw(@RequestBody Withdraw withdraw) {
 		
 		int runningAmt = withdraw.getAmount();
 		
 		List<BankNoteQty> bankNoteQtyList = StreamSupport.stream(bankNoteQtyRepository.findAll().spliterator(), false)
-		.sorted() // sort high to low eg 50, 20, 10
 		.filter(bnq -> bnq.getQuantity() != 0).collect(Collectors.toList());
 		
-		List<BankNote> dispense = new ArrayList<>();
 		List<Integer> denoms = bankNoteQtyList.stream().map(BankNoteQty::getBankNote).map(BankNote::getDenomination).sorted(Comparator.reverseOrder()).collect(Collectors.toList());
+		
+		
+		
+		// get array of banknotes
+		
+		
+		
+		List<BankNote> dispense = new ArrayList<>();
+		
 		
 		
 		
