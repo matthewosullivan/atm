@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import org.apache.commons.logging.Log;
@@ -40,24 +41,28 @@ public class AtmController {
 		return bankNoteQtyRepository.findAll();
 	}
 	
-	@RequestMapping(value = "/withdraw", method = RequestMethod.GET)
+	@RequestMapping(value = "/withdraw", method = RequestMethod.POST)
 	public Receipt withdraw() {
 		int runningAmt = 110;
 		
+		// create map Integer to banknoteqty
 		List<BankNoteQty> bankNoteQtyList = StreamSupport.stream(bankNoteQtyRepository.findAll().spliterator(), false)
 				.filter(bnq -> bnq.getQuantity() != 0).collect(Collectors.toList());
 		
 		// get list of bank notes
-		bankNoteQtyList.stream().map(bnq -> {
-			int[] notes = new int[bnq.getQuantity()];
-			Arrays.setAll(notes, () -> bnq.getBankNote().getDenomination());
-			return notes;
-		});
+		Integer[] array = bankNoteQtyList.stream().map(bnq -> {
+			Stream<Integer> stream = Stream.generate(() -> bnq.getBankNote().getDenomination()).limit(bnq.getQuantity());
+			return stream.toArray(Integer[]::new);
+		}).flatMap(x -> Arrays.stream(x)).toArray(Integer[]::new);
+		
+
+		
 		
 		
 		return null;
 	}
 	
+	/*
 	@RequestMapping(value = "/withdraw", method = RequestMethod.POST)
 	public Receipt withdraw(@RequestBody Withdraw withdraw) {
 		
@@ -101,13 +106,13 @@ public class AtmController {
 			
 			
 			
-			/*
+			
 			while (runningAmt > 0 && runningAmt - bnq.getBankNote().getDenomination() >= 0 && bnq.getQuantity() > 0 && aMethod(denoms, bnq, runningAmt)) {
 				
 				dispense.add(bnq.getBankNote());
 				bnq.decrement();
 			}
-			*/
+			
 		}
 		
 		if (runningAmt == 0 && dispense.stream().mapToInt(bn -> bn.getDenomination()).sum() == withdraw.getAmount()) {
@@ -120,7 +125,7 @@ public class AtmController {
 			
 		return new Receipt(RequestStatus.REJECTED);
 	}
-	
+	*/
 	
 	
 	private boolean aMethod(List<Integer> denoms, BankNoteQty bnq, int remainder) {

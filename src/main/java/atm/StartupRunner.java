@@ -1,6 +1,12 @@
 package atm;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -41,6 +47,26 @@ public class StartupRunner implements CommandLineRunner {
 		bankNoteQtyRepository.save(new BankNoteQty($20, 5, atmDevice));
 		bankNoteQtyRepository.save(new BankNoteQty($50, 5, atmDevice));
 		
+		
+		
+		
+		List<BankNoteQty> bankNoteQtyList = StreamSupport.stream(bankNoteQtyRepository.findAll().spliterator(), false)
+				.filter(bnq -> bnq.getQuantity() != 0).collect(Collectors.toList());
+		
+		// get list of bank notes
+		List<Integer> list = bankNoteQtyList.stream().map(bnq -> {
+			Stream<Integer> stream = Stream.generate(() -> bnq.getBankNote().getDenomination()).limit(bnq.getQuantity());
+			return stream.toArray(Integer[]::new);
+		})
+				.flatMap(x -> Arrays.stream(x))
+				.collect(Collectors.toList());
+		
+		
+		
+		
+		
 	}
+	
+	
 
 }
