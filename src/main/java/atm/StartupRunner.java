@@ -44,12 +44,12 @@ public class StartupRunner implements CommandLineRunner {
 		AtmDevice atmDevice = new AtmDevice();
 		atmDeviceRepository.save(atmDevice);
 		
-		bankNoteQtyRepository.save(new BankNoteQty($20, 5, atmDevice));
-		bankNoteQtyRepository.save(new BankNoteQty($50, 5, atmDevice));
+		bankNoteQtyRepository.save(new BankNoteQty($20, 8, atmDevice));
+		bankNoteQtyRepository.save(new BankNoteQty($50, 3, atmDevice));
 		
 		
 		
-		
+		/*
 		List<BankNoteQty> bankNoteQtyList = StreamSupport.stream(bankNoteQtyRepository.findAll().spliterator(), false)
 				.filter(bnq -> bnq.getQuantity() != 0).collect(Collectors.toList());
 		
@@ -61,7 +61,7 @@ public class StartupRunner implements CommandLineRunner {
 				.flatMap(x -> Arrays.stream(x))
 				.collect(Collectors.toList());
 		
-		
+		*/
 		
 		
 		

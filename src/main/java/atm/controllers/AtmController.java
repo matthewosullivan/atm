@@ -2,6 +2,7 @@ package atm.controllers;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import atm.KnapsackUtil;
 import atm.entity.BankNote;
 import atm.entity.BankNoteQty;
 import atm.entity.Receipt;
@@ -31,35 +33,60 @@ public class AtmController {
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	@Autowired
-	private BankNoteRepository bankNoteRepository;
-
-	@Autowired
 	private BankNoteQtyRepository bankNoteQtyRepository;
 
 	@RequestMapping(value = "", method = RequestMethod.GET)
-	public Iterable<BankNoteQty> getAllBooks() {
+	public Iterable<BankNoteQty> getHoldings() {
 		return bankNoteQtyRepository.findAll();
 	}
 	
+	@RequestMapping(value = "/deposit", method = RequestMethod.POST)
+	public Receipt deposit() {
+		throw new UnsupportedOperationException();
+		// TODO implement deposit 
+	}
+	
 	@RequestMapping(value = "/withdraw", method = RequestMethod.POST)
-	public Receipt withdraw() {
-		int runningAmt = 110;
+	public Receipt withdraw(@RequestBody Withdraw withdraw) {
 		
 		// create map Integer to banknoteqty
 		List<BankNoteQty> bankNoteQtyList = StreamSupport.stream(bankNoteQtyRepository.findAll().spliterator(), false)
 				.filter(bnq -> bnq.getQuantity() != 0).collect(Collectors.toList());
 		
 		// get list of bank notes
-		Integer[] array = bankNoteQtyList.stream().map(bnq -> {
+		int[] array = bankNoteQtyList.stream().map(bnq -> {
 			Stream<Integer> stream = Stream.generate(() -> bnq.getBankNote().getDenomination()).limit(bnq.getQuantity());
 			return stream.toArray(Integer[]::new);
-		}).flatMap(x -> Arrays.stream(x)).toArray(Integer[]::new);
+		}).flatMap(x -> Arrays.stream(x)).mapToInt(Integer::intValue)
+				.toArray();
 		
 
+		List<Integer> solution = KnapsackUtil.solve(array, withdraw.getAmount());
 		
+		// no combination of notes equal amount to withdraw
+		if (solution.isEmpty()) {
+			return new Receipt(RequestStatus.INSUFFICIENT_FUNDS);
+		}
 		
+		Receipt receipt = new Receipt(RequestStatus.ACCEPTED);
 		
-		return null;
+		List<BankNote> bankNotes = new ArrayList<>();
+		for (BankNoteQty bnq : bankNoteQtyList) {
+			
+			int numberOfNote = Collections.frequency(solution, bnq.getBankNote().getDenomination());
+			
+			int count = 0;
+			while (count < numberOfNote) {
+				bankNotes.add(bnq.getBankNote());
+				count++;
+				bnq.decrement();
+			}
+			
+			bankNoteQtyRepository.save(bnq);
+		}
+		
+		receipt.setBankNotesDispensed(bankNotes);
+		return receipt;
 	}
 	
 	/*
@@ -128,25 +155,4 @@ public class AtmController {
 	*/
 	
 	
-	private boolean aMethod(List<Integer> denoms, BankNoteQty bnq, int remainder) {
-		//System.out.println("Running Amt: " + remainder);
-		if (remainder == 0) return false;
-		
-		List<Integer> denomsToCheck = denoms.stream().filter(d -> d <= bnq.getBankNote().getDenomination()).collect(Collectors.toList());
-		for (int denom : denomsToCheck) {
-			System.out.println(remainder + " % " + denom);
-			if (remainder % denom == 0) return true;
-		}
-		
-		//if (remainder / bnq.getBankNote().getDenomination() > 0) {
-		//	return true;
-		//}
-		
-		return false;
-	}
-
-	@RequestMapping(value = "/withdraw", method = RequestMethod.GET)
-	public Withdraw getWithdraw() {
-		return new Withdraw(20);
-	}
 }
